@@ -1,0 +1,248 @@
+{
+  "info": {
+    "name": "Chess App",
+    "_postman_id": "todo-app-collection",
+    "description": "Collection complète pour l'API Chess App (auth, users, games)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT récupéré après login ou register"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "gameId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json.user?.id) pm.collectionVariables.set('userId', json.user.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"username\": \"johndoe\",\n  \"password\": \"secret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Crée un compte et stocke automatiquement le token + userId dans les variables de collection"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json.user?.id) pm.collectionVariables.set('userId', json.user.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"secret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Connecte l'utilisateur et stocke automatiquement le token + userId dans les variables de collection"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get all users",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "Get user by id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe_updated\",\n  \"password\": \"newpassword123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete user",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Games",
+      "item": [
+        {
+          "name": "Get all games",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/games"
+          }
+        },
+        {
+          "name": "Get game by id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/games/{{gameId}}"
+          }
+        },
+        {
+          "name": "Create game",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) pm.collectionVariables.set('gameId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/games",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timeControl\": \"blitz\",\n  \"timeLimit\": 300,\n  \"increment\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "timeControl: bullet | blitz | rapid | classical\ntimeLimit: durée en secondes (ex: 300 = 5min)\nincrement: secondes ajoutées par coup"
+          }
+        },
+        {
+          "name": "Simulate game (Scholar's Mate)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/games/{{gameId}}/simulate",
+            "description": "Joue une partie complète (Scholar's Mate, 7 coups, mat blanc). La partie doit être en statut 'waiting'."
+          }
+        },
+        {
+          "name": "Resign",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/games/{{gameId}}/resign",
+            "description": "Abandonne la partie. Le joueur connecté perd."
+          }
+        },
+        {
+          "name": "Offer draw",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/games/{{gameId}}/draw",
+            "description": "Propose la nulle à l'adversaire."
+          }
+        },
+        {
+          "name": "Accept draw",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/games/{{gameId}}/draw/accept",
+            "description": "Accepte l'offre de nulle (doit venir de l'autre joueur)."
+          }
+        },
+        {
+          "name": "Decline draw",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/games/{{gameId}}/draw/decline",
+            "description": "Refuse l'offre de nulle."
+          }
+        },
+        {
+          "name": "Download game report (PDF)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/games/{{gameId}}/report",
+            "description": "Génère un PDF avec les infos de la partie et l'historique des coups"
+          }
+        }
+      ]
+    }
+  ]
+}

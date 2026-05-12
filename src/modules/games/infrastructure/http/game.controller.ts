@@ -1,0 +1,97 @@
+import { mediator } from "@/mediator/mediator";
+import { Controller, Get, Post, UseMiddleware } from "@/decorators/http.decorators";
+import { CurrentUser, Param } from "@/decorators/param.decorators";
+import { authenticate } from "@/middlewares/auth.middleware";
+import { ValidatedBody } from "@/decorators/validated-body.decorator";
+import { CreateGameCommand } from "@/modules/games/application/commands/create-game.command";
+import { SimulateGameCommand } from "@/modules/games/application/commands/simulate-game.command";
+import { ResignGameCommand } from "@/modules/games/application/commands/resign-game.command";
+import { OfferDrawCommand } from "@/modules/games/application/commands/offer-draw.command";
+import { RespondDrawCommand } from "@/modules/games/application/commands/respond-draw.command";
+import { GetGameQuery } from "@/modules/games/application/queries/get-game.query";
+import { GetAllGamesQuery } from "@/modules/games/application/queries/get-all-games.query";
+import { GetGameReportQuery } from "@/modules/games/application/queries/get-game-report.query";
+import { CreateGameRequestDto } from "@/modules/games/application/dtos/game.request.dto";
+import { GameResponseDto } from "@/modules/games/application/dtos/game.response.dto";
+import { pdfService } from "@/pdf/pdf.service";
+
+type FileResponse = { __type: "file"; buffer: Buffer; filename: string; contentType: string };
+
+@UseMiddleware(authenticate)
+@Controller("/api/games")
+export class GameController {
+  @Get("/")
+  async getAll(): Promise<GameResponseDto[]> {
+    return mediator.send(new GetAllGamesQuery());
+  }
+
+  @Get("/:id/report")
+  async getReport(@Param("id") id: string): Promise<FileResponse> {
+    const payload = await mediator.send(new GetGameReportQuery(id));
+    const { buffer, filename } = await pdfService.generate("game.report", payload);
+    return { __type: "file", buffer, filename, contentType: "application/pdf" };
+  }
+
+  @Get("/:id")
+  async getById(
+    @Param("id") id: string,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(new GetGameQuery(id, userId));
+  }
+
+  @Post("/:id/resign")
+  async resign(
+    @Param("id") id: string,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(new ResignGameCommand(id, userId));
+  }
+
+  @Post("/:id/draw")
+  async offerDraw(
+    @Param("id") id: string,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(new OfferDrawCommand(id, userId));
+  }
+
+  @Post("/:id/draw/accept")
+  async acceptDraw(
+    @Param("id") id: string,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(new RespondDrawCommand(id, userId, true));
+  }
+
+  @Post("/:id/draw/decline")
+  async declineDraw(
+    @Param("id") id: string,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(new RespondDrawCommand(id, userId, false));
+  }
+
+  @Post("/:id/simulate")
+  async simulate(
+    @Param("id") id: string,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(new SimulateGameCommand(id, userId));
+  }
+
+  @Post("/")
+  async create(
+    @ValidatedBody(CreateGameRequestDto) dto: CreateGameRequestDto,
+    @CurrentUser() userId: string,
+  ): Promise<GameResponseDto> {
+    return mediator.send(
+      new CreateGameCommand(
+        userId,
+        dto.timeControl,
+        dto.timeLimit,
+        dto.increment,
+      ),
+    );
+  }
+}
