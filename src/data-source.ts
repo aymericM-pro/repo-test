@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { UserOrmEntity } from '@/modules/user/infrastructure/persistence/user.orm-entity';
 import { GameOrmEntity } from '@/modules/games/infrastructure/persistence/game.orm-entity';
+import { PlayerOrmEntity } from '@/modules/player/infrastructure/persistence/player.orm-entity';
 
 export const AppDataSource = new DataSource({
   type:        'postgres',
@@ -11,7 +12,7 @@ export const AppDataSource = new DataSource({
   database:    process.env.DB_NAME     ?? 'todo_db',
   synchronize: false,
   logging:     process.env.NODE_ENV === 'development',
-  entities:    [UserOrmEntity, GameOrmEntity],
+  entities:    [UserOrmEntity, GameOrmEntity, PlayerOrmEntity],
 });
 
 export async function connectDatabase(retries = 5, delay = 3000): Promise<void> {
