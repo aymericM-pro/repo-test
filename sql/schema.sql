@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    TIMESTAMP DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS players (
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    username   VARCHAR(50)  NOT NULL UNIQUE,
+    elo        INT          NOT NULL DEFAULT 1200,
+    rating     VARCHAR(50)  NOT NULL DEFAULT 'beginner',
+    created_at TIMESTAMP    NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS games (
     id              UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
     white_id        UUID            NOT NULL REFERENCES users(id) ON DELETE CASCADE,
