@@ -6,6 +6,7 @@ import { loadHandlers } from "@/mediator/loader";
 import { RouterFactory } from "@/router/router.factory";
 import { UserController } from "@/modules/user/infrastructure/http/user.controller";
 import { GameController } from "@/modules/games/infrastructure/http/game.controller";
+import { PlayerController } from "@/modules/player/infrastructure/http/player.controller";
 import { AuthController } from "@/modules/auth/infrastructure/http/auth.controller";
 import { getPrefix } from "@/decorators/http.decorators";
 import { httpLogger } from "@/middlewares/http-logger.middleware";
@@ -21,7 +22,7 @@ async function bootstrap() {
 
   app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
-  const controllers = [UserController, GameController, AuthController];
+  const controllers = [UserController, GameController, AuthController, PlayerController];
   for (const Controller of controllers) {
     app.use(getPrefix(Controller), RouterFactory.create(Controller));
   }

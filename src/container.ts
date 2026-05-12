@@ -8,6 +8,8 @@ import { HASH_SERVICE } from "@/modules/auth/domain/ports/hash.service.port";
 import { BcryptHashAdapter } from "@/modules/auth/infrastructure/services/bcrypt.hash.adapter";
 import { TOKEN_SERVICE } from "@/modules/auth/domain/ports/token.service.port";
 import { JwtTokenAdapter } from "@/modules/auth/infrastructure/services/jwt.token.adapter";
+import { PLAYER_REPOSITORY } from "@/modules/player/domain/ports/player.repository.port";
+import { PlayerRepositoryAdapter } from "@/modules/player/infrastructure/persistence/player.repository.adapter";
 import { EmailService } from "@/emails/email.service";
 import { NodemailerProvider } from "@/emails/nodemailer.provider";
 
@@ -18,6 +20,7 @@ const registry = new Map<symbol, unknown>();
 registry.set(LOGGER,           logger);
 registry.set(USER_REPOSITORY, new UserRepositoryAdapter());
 registry.set(GAME_REPOSITORY, new GameRepositoryAdapter());
+registry.set(PLAYER_REPOSITORY, new PlayerRepositoryAdapter());
 registry.set(HASH_SERVICE,    new BcryptHashAdapter());
 registry.set(TOKEN_SERVICE,   new JwtTokenAdapter());
 
