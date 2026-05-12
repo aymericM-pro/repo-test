@@ -11,4 +11,14 @@ export class PlayerRepositoryAdapter implements IPlayerRepository {
     const row = await this.orm.findOne({ where: { id } });
     return row ? PlayerMapper.toDomain(row) : null;
   }
+
+  async findByUsername(username: string): Promise<PlayerEntity | null> {
+    const row = await this.orm.findOne({ where: { username } });
+    return row ? PlayerMapper.toDomain(row) : null;
+  }
+
+  async save(entity: PlayerEntity): Promise<PlayerEntity> {
+    const saved = await this.orm.save(PlayerMapper.toOrm(entity));
+    return PlayerMapper.toDomain(saved);
+  }
 }
