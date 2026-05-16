@@ -69,6 +69,9 @@ export class GameOrmEntity {
   @Column({ name: "draw_offered_by", type: "uuid", nullable: true })
   drawOfferedBy!: string | null;
 
+  @Column({ name: "player_id", type: "uuid", nullable: true })
+  playerId!: string | null;
+
   @CreateDateColumn({ name: "created_at" })
   createdAt!: Date;
 }

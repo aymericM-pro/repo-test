@@ -54,6 +54,18 @@ CREATE TABLE IF NOT EXISTS games (
     started_at      TIMESTAMP,
     finished_at     TIMESTAMP,
     draw_offered_by UUID            REFERENCES users(id) ON DELETE SET NULL,
+    player_id       UUID            REFERENCES players(id) ON DELETE SET NULL,
     created_at      TIMESTAMP       NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS parties (
+    id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    white_player_id UUID         NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+    black_player_id UUID         REFERENCES players(id) ON DELETE SET NULL,
+    status          game_status  NOT NULL DEFAULT 'waiting',
+    time_control    time_control NOT NULL,
+    time_limit      INT          NOT NULL,
+    increment       INT          NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP    NOT NULL DEFAULT now()
 );
 

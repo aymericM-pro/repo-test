@@ -81,6 +81,7 @@ export class GameEntity {
     public finishedAt: Date | null,
     public readonly createdAt: Date,
     public drawOfferedBy: string | null = null,
+    public playerId: string | null = null,
   ) {}
 
   static create(params: {
@@ -89,6 +90,7 @@ export class GameEntity {
     timeControl: TimeControl;
     timeLimit: number;
     increment: number;
+    playerId?: string | null;
   }): GameEntity {
     return new GameEntity(
       params.id,
@@ -109,6 +111,8 @@ export class GameEntity {
       null,
       null,
       new Date(),
+      null,
+      params.playerId ?? null,
     );
   }
 

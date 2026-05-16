@@ -25,6 +25,7 @@ export class GameMapper {
     dto.finishedAt = entity.finishedAt;
     dto.createdAt = entity.createdAt;
     dto.drawOfferedBy = entity.drawOfferedBy;
+    dto.playerId = entity.playerId;
     return dto;
   }
 
@@ -50,6 +51,7 @@ export class GameMapper {
       orm.finishedAt,
       orm.createdAt,
       orm.drawOfferedBy,
+      orm.playerId,
     );
   }
 
@@ -74,6 +76,7 @@ export class GameMapper {
     orm.startedAt = entity.startedAt;
     orm.finishedAt = entity.finishedAt;
     orm.drawOfferedBy = entity.drawOfferedBy;
+    orm.playerId = entity.playerId;
     return orm;
   }
 }

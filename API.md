@@ -213,7 +213,8 @@ Crée une nouvelle partie. L'utilisateur connecté joue les blancs. La partie d�
 {
   "timeControl": "blitz",   // "bullet" | "blitz" | "rapid" | "classical", requis
   "timeLimit": 300,         // durée en secondes par joueur, entier > 0, requis
-  "increment": 3            // secondes ajoutées par coup, entier ≥ 0, requis
+  "increment": 3,           // secondes ajoutées par coup, entier ≥ 0, requis
+  "playerId": "uuid"        // UUID du joueur IA adverse, optionnel
 }
 ```
 
@@ -288,6 +289,67 @@ Refuse l'offre de nulle. Efface `drawOfferedBy`, la partie continue.
 **Réponse `200`** : `GameResponseDto` (`drawOfferedBy` remis à `null`)
 
 **Erreurs** : `404` introuvable, `409` aucune offre en cours, `403` pas dans cette partie.
+
+---
+
+## Players
+
+🔒 Toutes les routes nécessitent un token.
+
+### `PlayerResponseDto` — structure commune aux réponses
+
+```json
+{
+  "id": "uuid",
+  "username": "stockfish",
+  "elo": 1200,
+  "rating": "beginner",
+  "createdAt": "date"
+}
+```
+
+---
+
+### `GET /api/players/:playerId`
+
+Retourne un joueur IA par son ID.
+
+**Params** : `playerId` — UUID
+
+**Réponse `200`** : `PlayerResponseDto`
+
+**Erreurs** : `404` joueur introuvable.
+
+---
+
+### `POST /api/players`
+
+Crée un joueur IA.
+
+**Body**
+```json
+{
+  "username": "stockfish",   // string ≤ 50 chars, requis
+  "elo": 1200,               // entier > 0, optionnel (défaut : 1200)
+  "rating": "beginner"       // string ≤ 50 chars, optionnel (défaut : "beginner")
+}
+```
+
+**Réponse `201`** : `PlayerResponseDto`
+
+---
+
+### `POST /api/players/:playerId/games`
+
+Crée une partie contre un joueur IA. L'utilisateur connecté joue les blancs.
+
+**Params** : `playerId` — UUID
+
+**Body** : même structure que `POST /api/games`
+
+**Réponse `200`** : `GameResponseDto` (status: `waiting`)
+
+**Erreurs** : `404` joueur introuvable.
 
 ---
 

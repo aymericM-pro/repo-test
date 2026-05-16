@@ -9,5 +9,6 @@ export class CreateGameCommand implements IRequest<GameResponseDto> {
     public readonly timeControl: TimeControl,
     public readonly timeLimit: number,
     public readonly increment: number,
+    public readonly playerId: string | null,
   ) {}
 }

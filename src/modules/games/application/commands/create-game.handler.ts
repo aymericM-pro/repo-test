@@ -29,6 +29,7 @@ export class CreateGameHandler implements IHandler<
       timeControl: cmd.timeControl,
       timeLimit: cmd.timeLimit,
       increment: cmd.increment,
+      playerId: cmd.playerId,
     });
 
     return GameMapper.toResponse(await this.repo.save(game));

@@ -91,6 +91,7 @@ export class GameController {
         dto.timeControl,
         dto.timeLimit,
         dto.increment,
+        dto.playerId ?? null,
       ),
     );
   }

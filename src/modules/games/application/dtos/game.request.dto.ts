@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsPositive, Min } from "class-validator";
+import { IsEnum, IsInt, IsOptional, IsPositive, IsUUID, Min } from "class-validator";
 import { TimeControl } from "@/modules/games/domain/game.entity";
 
 export class CreateGameRequestDto {
@@ -12,4 +12,8 @@ export class CreateGameRequestDto {
   @IsInt()
   @Min(0)
   increment!: number;
+
+  @IsOptional()
+  @IsUUID()
+  playerId?: string;
 }

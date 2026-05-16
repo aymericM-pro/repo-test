@@ -27,4 +27,5 @@ export class GameResponseDto {
   finishedAt!: Date | null;
   createdAt!: Date;
   drawOfferedBy!: string | null;
+  playerId!: string | null;
 }
