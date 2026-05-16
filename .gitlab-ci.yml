@@ -1,0 +1,81 @@
+stages:
+  - build
+  - test
+
+default:
+  image: node:20-alpine
+
+variables:
+  PNPM_VERSION: "9.0.0"
+  PNPM_STORE_PATH: "$CI_PROJECT_DIR/.pnpm-store"
+
+.pnpm-setup: &pnpm-setup
+  - corepack enable
+  - corepack prepare pnpm@$PNPM_VERSION --activate
+
+# ─── BUILD ────────────────────────────────────────────────────────────────────
+
+install-and-build:
+  stage: build
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+  before_script:
+    - *pnpm-setup
+    - pnpm config set store-dir $PNPM_STORE_PATH
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm build
+  artifacts:
+    expire_in: 1h
+    paths:
+      - dist/
+      - node_modules/
+
+# ─── TEST ─────────────────────────────────────────────────────────────────────
+
+test-unit:
+  stage: test
+  needs:
+    - install-and-build
+  before_script:
+    - *pnpm-setup
+  script:
+    - pnpm test:unit
+  artifacts:
+    expire_in: 1h
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+
+test-integration:
+  stage: test
+  needs:
+    - install-and-build
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: todo_db
+    POSTGRES_USER: todo_user
+    POSTGRES_PASSWORD: $DB_PASSWORD
+    DB_HOST: postgres
+    DB_PORT: "5432"
+    DB_USER: todo_user
+    DB_PASSWORD: $DB_PASSWORD
+    DB_NAME: todo_db
+    NODE_ENV: test
+    JWT_SECRET: $JWT_SECRET
+  before_script:
+    - *pnpm-setup
+    - apk add --no-cache postgresql-client
+    - until pg_isready -h postgres -U todo_user; do sleep 1; done
+    - psql -h postgres -U todo_user -d todo_db -f sql/schema.sql
+  script:
+    - pnpm test:integration
