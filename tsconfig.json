@@ -1,21 +1,21 @@
 {
   "compilerOptions": {
-    "target":                   "ES2022",
-    "module":                   "CommonJS",
-    "lib":                      ["ES2022"],
-    "outDir":                   "./dist",
-    "rootDir":                  "./",
-    "strict":                   true,
-    "experimentalDecorators":   true,
-    "emitDecoratorMetadata":    true,
-    "esModuleInterop":          true,
-    "skipLibCheck":             true,
-    "resolveJsonModule":        true,
-    "baseUrl":                  ".",
+    "target": "ES2022",
+    "module": "CommonJS",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*", "tests/**/*", "tests/integration/**/*"],
   "exclude": ["node_modules", "dist"]
 }
