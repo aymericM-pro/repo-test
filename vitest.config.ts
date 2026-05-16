@@ -10,6 +10,7 @@ export default defineConfig({
   test: {
     globals:     true,
     environment: 'node',
+    include:     ['tests/unit/**/*.spec.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'cobertura'],

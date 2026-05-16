@@ -1,69 +1,63 @@
 import 'reflect-metadata';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import express from 'express';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import { join } from 'path';
+import express, { type Express } from 'express';
 import request from 'supertest';
 import { RouterFactory } from '@/router/router.factory';
 import { getPrefix } from '@/decorators/http.decorators';
 import { AuthController } from '@/modules/auth/infrastructure/http/auth.controller';
 import { errorHandler } from '@/middlewares/error.middleware';
-import { AppError } from '@/errors/app-error';
-
-vi.mock('@/mediator/mediator', () => ({
-  mediator: { send: vi.fn() },
-}));
-
-import { mediator } from '@/mediator/mediator';
-const mockSend = vi.mocked(mediator.send);
-
-function buildApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(getPrefix(AuthController), RouterFactory.create(AuthController));
-  app.use(errorHandler);
-  return app;
-}
+import { loadHandlers } from '@/mediator/loader';
 
 const VALID_REGISTER_BODY = {
-  email: 'alice@example.com',
+  email:    'alice@example.com',
   username: 'alice',
   password: 'password123',
 };
 
 const VALID_LOGIN_BODY = {
-  email: 'alice@example.com',
+  email:    'alice@example.com',
   password: 'password123',
 };
 
+let app: Express;
+
+beforeAll(async () => {
+  await loadHandlers(join(process.cwd(), 'src/modules'));
+  app = express();
+  app.use(express.json());
+  app.use(getPrefix(AuthController), RouterFactory.create(AuthController));
+  app.use(errorHandler);
+});
+
 describe('POST /api/auth/register', () => {
-  beforeEach(() => {
-    mockSend.mockReset();
-  });
-
-  it('returns 200 and the auth response when the body is valid', async () => {
-    const authResponse = { token: 'jwt-token', user: { id: 'u1', email: 'alice@example.com', username: 'alice' } };
-    mockSend.mockResolvedValue(authResponse);
-
-    const res = await request(buildApp())
-      .post('/api/auth/register')
-      .send(VALID_REGISTER_BODY);
+  it('crée un utilisateur et retourne 200 + token', async () => {
+    const res = await request(app).post('/api/auth/register').send(VALID_REGISTER_BODY);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(authResponse);
-    expect(mockSend).toHaveBeenCalledOnce();
+    expect(res.body).toMatchObject({
+      token: expect.any(String),
+      user:  { email: 'alice@example.com', username: 'alice' },
+    });
   });
 
-  it('returns 400 when required fields are missing', async () => {
-    const res = await request(buildApp())
-      .post('/api/auth/register')
-      .send({ email: 'alice@example.com' });
+  it('retourne 409 si l\'email est déjà utilisé', async () => {
+    await request(app).post('/api/auth/register').send(VALID_REGISTER_BODY);
+    const res = await request(app).post('/api/auth/register').send(VALID_REGISTER_BODY);
+
+    expect(res.status).toBe(409);
+    expect(res.body).toMatchObject({ code: 'USER_ALREADY_EXISTS' });
+  });
+
+  it('retourne 400 si les champs requis manquent', async () => {
+    const res = await request(app).post('/api/auth/register').send({ email: 'alice@example.com' });
 
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty('errors');
-    expect(mockSend).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when password is too short', async () => {
-    const res = await request(buildApp())
+  it('retourne 400 si le mot de passe est trop court', async () => {
+    const res = await request(app)
       .post('/api/auth/register')
       .send({ ...VALID_REGISTER_BODY, password: 'short' });
 
@@ -73,40 +67,43 @@ describe('POST /api/auth/register', () => {
 });
 
 describe('POST /api/auth/login', () => {
-  beforeEach(() => {
-    mockSend.mockReset();
+  beforeEach(async () => {
+    // afterEach dans setup.ts tronque les tables — on ré-inscrit alice avant chaque test
+    await request(app).post('/api/auth/register').send(VALID_REGISTER_BODY);
   });
 
-  it('returns 200 and the auth response when credentials are valid', async () => {
-    const authResponse = { token: 'jwt-token', user: { id: 'u1', email: 'alice@example.com', username: 'alice' } };
-    mockSend.mockResolvedValue(authResponse);
-
-    const res = await request(buildApp())
-      .post('/api/auth/login')
-      .send(VALID_LOGIN_BODY);
+  it('retourne 200 + token avec des identifiants valides', async () => {
+    const res = await request(app).post('/api/auth/login').send(VALID_LOGIN_BODY);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual(authResponse);
+    expect(res.body).toMatchObject({
+      token: expect.any(String),
+      user:  { email: 'alice@example.com' },
+    });
   });
 
-  it('returns 401 when mediator throws an auth AppError', async () => {
-    mockSend.mockRejectedValue(new AppError('USER_INVALID_CREDENTIALS', 401, 'Invalid email or password'));
-
-    const res = await request(buildApp())
+  it('retourne 401 avec un mauvais mot de passe', async () => {
+    const res = await request(app)
       .post('/api/auth/login')
-      .send(VALID_LOGIN_BODY);
+      .send({ ...VALID_LOGIN_BODY, password: 'wrongpassword' });
 
     expect(res.status).toBe(401);
     expect(res.body).toMatchObject({ code: 'USER_INVALID_CREDENTIALS' });
   });
 
-  it('returns 400 when the email field is missing', async () => {
-    const res = await request(buildApp())
+  it('retourne 401 avec un email inconnu', async () => {
+    const res = await request(app)
       .post('/api/auth/login')
-      .send({ password: 'password123' });
+      .send({ email: 'unknown@example.com', password: 'password123' });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toMatchObject({ code: 'USER_INVALID_CREDENTIALS' });
+  });
+
+  it('retourne 400 si le champ email manque', async () => {
+    const res = await request(app).post('/api/auth/login').send({ password: 'password123' });
 
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty('errors');
-    expect(mockSend).not.toHaveBeenCalled();
   });
 });
