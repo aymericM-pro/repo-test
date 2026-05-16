@@ -44,7 +44,7 @@ test-unit:
   before_script:
     - *pnpm-setup
   script:
-    - pnpm test:unit
+    - pnpm test:unit --coverage
   artifacts:
     expire_in: 1h
     reports:
@@ -76,6 +76,6 @@ test-integration:
     - *pnpm-setup
     - apk add --no-cache postgresql-client
     - until pg_isready -h postgres -U todo_user; do sleep 1; done
-    - psql -h postgres -U todo_user -d todo_db -f sql/schema.sql
+    - PGPASSWORD=$DB_PASSWORD psql -h postgres -U todo_user -d todo_db -f sql/schema.sql
   script:
     - pnpm test:integration

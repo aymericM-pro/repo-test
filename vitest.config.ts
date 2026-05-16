@@ -12,7 +12,8 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'lcov'],
+      reporter: ['text', 'lcov', 'cobertura'],
+      reportsDirectory: 'coverage',
       include:  ['src/**/*.ts'],
       exclude:  ['src/**/*.dto.ts', 'src/**/*.orm-entity.ts'],
     },
