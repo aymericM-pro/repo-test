@@ -68,7 +68,6 @@ describe('POST /api/auth/register', () => {
 
 describe('POST /api/auth/login', () => {
   beforeEach(async () => {
-    // afterEach dans setup.ts tronque les tables — on ré-inscrit alice avant chaque test
     await request(app).post('/api/auth/register').send(VALID_REGISTER_BODY);
   });
 

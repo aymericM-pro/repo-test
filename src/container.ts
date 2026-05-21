@@ -12,6 +12,9 @@ import { PLAYER_REPOSITORY } from "@/modules/player/domain/ports/player.reposito
 import { PlayerRepositoryAdapter } from "@/modules/player/infrastructure/persistence/player.repository.adapter";
 import { EmailService } from "@/emails/email.service";
 import { NodemailerProvider } from "@/emails/nodemailer.provider";
+import { StorageService } from "@/storage/storage.service";
+import { GcpStorageProvider } from "@/storage/providers/gcp/gcp-storage.provider";
+import { loadGcpStorageConfig } from "@/storage/providers/gcp/gcp-storage.config";
 
 export const logger = PinoLogger.create();
 
@@ -24,7 +27,8 @@ registry.set(PLAYER_REPOSITORY, new PlayerRepositoryAdapter());
 registry.set(HASH_SERVICE,    new BcryptHashAdapter());
 registry.set(TOKEN_SERVICE,   new JwtTokenAdapter());
 
-export const emailService = new EmailService(new NodemailerProvider());
+export const emailService   = new EmailService(new NodemailerProvider());
+export const storageService = new StorageService(new GcpStorageProvider(loadGcpStorageConfig()));
 
 export const container = {
   resolve: <T>(token: symbol): T => {

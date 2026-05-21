@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { getRoutes, getMiddlewares } from "@/decorators/http.decorators";
+import { getRoutes, getMiddlewares, getRouteMiddlewares } from "@/decorators/http.decorators";
 import { getParams } from "@/decorators/param.decorators";
 import {
   getValidatedBody,
@@ -18,8 +18,10 @@ export class RouterFactory {
     }
 
     for (const route of routes) {
+      const routeMiddlewares = getRouteMiddlewares(ControllerClass, route.handlerKey);
       router[route.method](
         route.path,
+        ...(routeMiddlewares as any[]),
         this.buildHandler(instance, route.handlerKey as string),
       );
     }
@@ -82,6 +84,8 @@ export class RouterFactory {
         return (req as any).userId;
       case "body":
         return req.body;
+      case "file":
+        return (req as any).file;
       default:
         return undefined;
     }

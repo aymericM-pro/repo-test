@@ -5,6 +5,8 @@ export class UserEntity {
     public username:           string,
     public passwordHash:       string,
     public readonly createdAt: Date,
+    public firstName?:         string,
+    public lastName?:          string,
   ) {}
 
   static create(params: {

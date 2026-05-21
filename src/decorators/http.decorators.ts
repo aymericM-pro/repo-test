@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 
-const ROUTES_KEY     = Symbol('routes');
-const MIDDLEWARE_KEY = Symbol('middleware');
-const CONTROLLER_KEY = Symbol('controller_prefix');
+const ROUTES_KEY           = Symbol('routes');
+const MIDDLEWARE_KEY       = Symbol('middleware');
+const ROUTE_MIDDLEWARE_KEY = Symbol('route_middleware');
+const CONTROLLER_KEY       = Symbol('controller_prefix');
 
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
@@ -23,6 +24,15 @@ export function Controller(prefix: string) {
 export function UseMiddleware(...middlewares: Function[]) {
   return (target: Function) => {
     Reflect.defineMetadata(MIDDLEWARE_KEY, middlewares, target);
+  };
+}
+
+export function RouteMiddleware(...middlewares: Function[]) {
+  return (target: object, methodKey: string | symbol) => {
+    const map: Map<string | symbol, Function[]> =
+      Reflect.getMetadata(ROUTE_MIDDLEWARE_KEY, (target as any).constructor) ?? new Map();
+    map.set(methodKey, middlewares);
+    Reflect.defineMetadata(ROUTE_MIDDLEWARE_KEY, map, (target as any).constructor);
   };
 }
 
@@ -55,4 +65,10 @@ export function getPrefix(target: Function): string {
 
 export function getMiddlewares(target: Function): Function[] {
   return Reflect.getMetadata(MIDDLEWARE_KEY, target) ?? [];
+}
+
+export function getRouteMiddlewares(target: Function, methodKey: string | symbol): Function[] {
+  const map: Map<string | symbol, Function[]> | undefined =
+    Reflect.getMetadata(ROUTE_MIDDLEWARE_KEY, target);
+  return map?.get(methodKey) ?? [];
 }

@@ -10,7 +10,7 @@ export const AppDataSource = new DataSource({
   username:    process.env.DB_USER     ?? 'todo_user',
   password:    process.env.DB_PASSWORD ?? 'todo_pass',
   database:    process.env.DB_NAME     ?? 'todo_db',
-  synchronize: false,
+  synchronize: true,
   logging:     process.env.NODE_ENV === 'development',
   entities:    [UserOrmEntity, GameOrmEntity, PlayerOrmEntity],
 });

@@ -5,17 +5,11 @@ import { CreateGameCommand } from "@/modules/games/application/commands/create-g
 import { GameEntity } from "@/modules/games/domain/game.entity";
 import { GameMapper } from "@/modules/games/application/mappers/game.mapper";
 import { GameResponseDto } from "@/modules/games/application/dtos/game.response.dto";
-import {
-  IGameRepository,
-  GAME_REPOSITORY,
-} from "@/modules/games/domain/ports/game.repository.port";
+import { IGameRepository, GAME_REPOSITORY } from "@/modules/games/domain/ports/game.repository.port";
 import { container } from "@/container";
 
 @Handler(CreateGameCommand)
-export class CreateGameHandler implements IHandler<
-  CreateGameCommand,
-  GameResponseDto
-> {
+export class CreateGameHandler implements IHandler<CreateGameCommand, GameResponseDto> {
   private readonly repo: IGameRepository;
 
   constructor(repo?: IGameRepository) {
@@ -23,15 +17,22 @@ export class CreateGameHandler implements IHandler<
   }
 
   async handle(cmd: CreateGameCommand): Promise<GameResponseDto> {
-    const game = GameEntity.create({
-      id: randomUUID(),
-      whiteId: cmd.whiteId,
-      timeControl: cmd.timeControl,
-      timeLimit: cmd.timeLimit,
-      increment: cmd.increment,
-      playerId: cmd.playerId,
-    });
+    try {
+      const game = GameEntity.create({
+        id: randomUUID(),
+        whiteId: cmd.whiteId,
+        blackId: cmd.opponent,
+        timeControl: cmd.timeControl,
+        timeLimit: cmd.timeLimit,
+        increment: cmd.increment,
+        playerId: cmd.playerId,
+      });
 
-    return GameMapper.toResponse(await this.repo.save(game));
+      const saved = await this.repo.save(game);
+      return GameMapper.toResponse(saved);
+    } catch (e) {
+      console.error("[CreateGameHandler] error:", e);
+      throw e;
+    }
   }
 }

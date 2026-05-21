@@ -18,3 +18,11 @@ export class UpdateUserRequestDto {
   @IsOptional() @IsString() @MinLength(8)
   password?: string;
 }
+
+export class PatchUserRequestDto {
+  @IsOptional() @IsString() @MaxLength(100)
+  firstName?: string;
+
+  @IsOptional() @IsString() @MaxLength(100)
+  lastName?: string;
+}

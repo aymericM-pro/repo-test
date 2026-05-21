@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 export const PARAMS_KEY = Symbol('params');
 
-export type ParamType = 'body' | 'param' | 'query' | 'userId';
+export type ParamType = 'body' | 'param' | 'query' | 'userId' | 'file';
 
 export interface ParamDefinition {
   index: number;
@@ -19,10 +19,11 @@ function createParamDecorator(type: ParamType, key?: string) {
   };
 }
 
-export const Param       = (key: string) => createParamDecorator('param',  key);
-export const QueryParam  = (key: string) => createParamDecorator('query',  key);
-export const Body        = ()            => createParamDecorator('body');
-export const CurrentUser = ()            => createParamDecorator('userId');
+export const Param        = (key: string) => createParamDecorator('param',  key);
+export const QueryParam   = (key: string) => createParamDecorator('query',  key);
+export const Body         = ()            => createParamDecorator('body');
+export const CurrentUser  = ()            => createParamDecorator('userId');
+export const UploadedFile = ()            => createParamDecorator('file');
 
 export function getParams(target: object, methodKey: string | symbol): ParamDefinition[] {
   return Reflect.getMetadata(PARAMS_KEY, target, methodKey) ?? [];

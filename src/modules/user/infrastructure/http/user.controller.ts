@@ -1,5 +1,5 @@
 import { mediator }          from '@/mediator/mediator';
-import { Controller, Get, Post, Put, Delete, UseMiddleware } from '@/decorators/http.decorators';
+import { Controller, Get, Post, Put, Patch, Delete, UseMiddleware } from '@/decorators/http.decorators';
 import { Param }             from '@/decorators/param.decorators';
 import { authenticate }      from '@/middlewares/auth.middleware';
 import { ValidatedBody }     from '@/decorators/validated-body.decorator';
@@ -7,8 +7,9 @@ import { GetAllUsersQuery }  from '@/modules/user/application/queries/get-all-us
 import { GetUserQuery }      from '@/modules/user/application/queries/get-user.query';
 import { CreateUserCommand } from '@/modules/user/application/commands/create-user.command';
 import { UpdateUserCommand } from '@/modules/user/application/commands/update-user.command';
+import { PatchUserCommand }  from '@/modules/user/application/commands/patch-user.command';
 import { DeleteUserCommand } from '@/modules/user/application/commands/delete-user.command';
-import { CreateUserRequestDto, UpdateUserRequestDto } from '@/modules/user/application/dtos/user.request.dto';
+import { CreateUserRequestDto, UpdateUserRequestDto, PatchUserRequestDto } from '@/modules/user/application/dtos/user.request.dto';
 import { UserResponseDto }   from '@/modules/user/application/dtos/user.response.dto';
 
 @UseMiddleware(authenticate)
@@ -38,6 +39,14 @@ export class UserController {
     @ValidatedBody(UpdateUserRequestDto) dto: UpdateUserRequestDto,
   ): Promise<UserResponseDto> {
     return mediator.send(new UpdateUserCommand(userId, dto.username, dto.password));
+  }
+
+  @Patch('/:userId')
+  async patch(
+    @Param('userId')                    userId: string,
+    @ValidatedBody(PatchUserRequestDto) dto: PatchUserRequestDto,
+  ): Promise<UserResponseDto> {
+    return mediator.send(new PatchUserCommand(userId, dto.firstName, dto.lastName));
   }
 
   @Delete('/:userId')

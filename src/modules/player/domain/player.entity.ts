@@ -1,10 +1,13 @@
 export class PlayerEntity {
   constructor(
-    public readonly id:        string,
-    public          username:  string,
-    public          elo:       number,
-    public          rating:    string,
-    public readonly createdAt: Date,
+    public readonly id:             string,
+    public          username:       string,
+    public          elo:            number,
+    public          rating:         string,
+    public readonly createdAt:      Date,
+    public          bio?:           string,
+    public          country?:       string,
+    public          preferredColor?: string,
   ) {}
 
   static create(params: {

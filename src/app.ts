@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import cors from "cors";
 import express from "express";
 import { join } from "path";
 import { connectDatabase } from "@/data-source";
@@ -17,6 +18,7 @@ async function bootstrap() {
   const app  = express();
   const port = Number(process.env.PORT ?? 3000);
 
+  app.use(cors({ origin: "http://localhost:5173", credentials: true }));
   app.use(express.json());
   app.use(httpLogger(logger));
 

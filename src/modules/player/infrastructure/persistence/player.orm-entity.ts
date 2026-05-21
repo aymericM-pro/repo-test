@@ -14,6 +14,15 @@ export class PlayerOrmEntity {
   @Column({ length: 50 })
   rating!: string;
 
+  @Column({ type: 'text', nullable: true })
+  bio?: string;
+
+  @Column({ length: 10, nullable: true })
+  country?: string;
+
+  @Column({ length: 20, nullable: true })
+  preferredColor?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }

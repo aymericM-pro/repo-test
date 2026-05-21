@@ -5,10 +5,11 @@ import { TimeControl } from "@/modules/games/domain/game.entity";
 export class CreateGameCommand implements IRequest<GameResponseDto> {
   declare readonly _responseType: GameResponseDto;
   constructor(
-    public readonly whiteId: string,
-    public readonly timeControl: TimeControl,
-    public readonly timeLimit: number,
-    public readonly increment: number,
-    public readonly playerId: string | null,
+      public readonly whiteId: string,
+      public readonly timeControl: TimeControl,
+      public readonly timeLimit: number,
+      public readonly increment: number,
+      public readonly playerId: string | null,
+      public readonly opponent: string | null,
   ) {}
 }

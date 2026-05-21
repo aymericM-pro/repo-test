@@ -87,32 +87,33 @@ export class GameEntity {
   static create(params: {
     id: string;
     whiteId: string;
+    blackId: string | null;
     timeControl: TimeControl;
     timeLimit: number;
     increment: number;
     playerId?: string | null;
   }): GameEntity {
     return new GameEntity(
-      params.id,
-      params.whiteId,
-      null,
-      GameStatus.WAITING,
-      null,
-      null,
-      params.timeControl,
-      params.timeLimit,
-      params.increment,
-      params.timeLimit,
-      params.timeLimit,
-      [],
-      Color.WHITE,
-      0,
-      null,
-      null,
-      null,
-      new Date(),
-      null,
-      params.playerId ?? null,
+        params.id,
+        params.whiteId,
+        params.blackId,
+        GameStatus.ACTIVE,
+        null,
+        null,
+        params.timeControl,
+        params.timeLimit,
+        params.increment,
+        params.timeLimit,
+        params.timeLimit,
+        [],
+        Color.WHITE,
+        0,
+        null,
+        new Date(),
+        null,
+        new Date(),
+        null,
+        params.playerId ?? null,
     );
   }
 
